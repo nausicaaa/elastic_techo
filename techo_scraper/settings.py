@@ -11,8 +11,8 @@
 
 BOT_NAME = 'elastic_techo'
 
-SPIDER_MODULES = ['elastic_techo.spiders']
-NEWSPIDER_MODULE = 'elastic_techo.spiders'
+SPIDER_MODULES = ['techo_scraper.spiders']
+NEWSPIDER_MODULE = 'techo_scraper.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent

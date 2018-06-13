@@ -1,7 +1,11 @@
+import datetime
+
 import scrapy
 from scrapy.contrib.spiders import Rule
 from scrapy.linkextractors import LinkExtractor
 from lxml import html
+
+from techo_scraper.items import Product
 
 
 class TechoSpider(scrapy.Spider):
@@ -13,7 +17,7 @@ class TechoSpider(scrapy.Spider):
     )
 
     Rules = (Rule(LinkExtractor(allow=(),
-                                # restrict_xpaths=('//a[@class="button next"]',)
+                                restrict_xpaths=('//a[@class="pagination--button prev-next"]',)
                                 ),
                   callback="parse",
                   follow= True),)
@@ -24,18 +28,16 @@ class TechoSpider(scrapy.Spider):
         prices = site.xpath('//div[contains(@class, "price-per-quantity-weight")]//span[contains(@class, "value")]')
         currencies = site.xpath('//span[contains(@class, "currency")]')
         kg_or_szts = site.xpath('//span[contains(@class, "weight")]')
-        converter = currencies[0].text + kg_or_szts[0].text
-        print(names[0].text, prices[0].text, converter, 'AAAA')
-
-# lista produktów jest w :
-# <li class="product-list--list-item first">
-# dobrze by wyciągnąć ilość stron ta jak oni tam w przykładzie robią albo to olać i iterować aż do błędu.
-
-
-        # follow next page links
-        # next_page = response.xpath('.//a[@class="button next"]/@href').extract()
-        # if next_page:
-        #     next_href = next_page[0]
-        #     next_page_url = 'http://sfbay.craigslist.org' + next_href
-        #     request = scrapy.Request(url=next_page_url)
-        #     yield request
+        for name, price, currency, kg_or_szt in zip(names, prices, currencies, kg_or_szts):
+            unit = currency.text + kg_or_szt.text
+            p = Product(name=name.text, price=price.text, currency=currency.text, kg_or_szt=kg_or_szt.text, unit=unit,
+                        last_updated=datetime.datetime.now())
+            # print("AA", p["name"], p["kg_or_szt"], p["currency"], unit)
+            
+        next_page = response.xpath("//a[contains(span/@class, 'icon-icon_whitechevronright') and not(contains(@class, 'disabled'))]/@href").extract()
+        if next_page:
+            next_href = next_page[0]
+            next_page_url = 'https://ezakupy.tesco.pl' + next_href
+            print("Scraped products from url with number:", next_href)
+            request = scrapy.Request(url=next_page_url)
+            yield request
