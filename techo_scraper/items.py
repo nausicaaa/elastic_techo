@@ -15,3 +15,6 @@ class Product(scrapy.Item):
     kg_or_szt = scrapy.Field()
     unit = scrapy.Field()
     last_updated = scrapy.Field()
+    category = scrapy.Field()
+    url = scrapy.Field()
+
