@@ -1,5 +1,6 @@
 import datetime
 import logging
+import re
 
 import scrapy
 from colorlog import ColoredFormatter
@@ -51,11 +52,19 @@ class TechoSpider(scrapy.Spider):
         currencies = dom.xpath('//span[contains(@class, "currency")]')
         kg_or_szts = dom.xpath('//span[contains(@class, "weight")]')
         for name, price, currency, kg_or_szt, uri in zip(names, prices, currencies, kg_or_szts, uris):
-            unit = currency.text + kg_or_szt.text
+            maybe_volume = re.search(r'[\d,]+\s*(g|kg|ml|szt)', name.text)
+            if maybe_volume:
+                volume = maybe_volume.group()
+                self.crawler.stats.inc_value('regex matched', 1)
+            else:
+                volume = None
+                self.crawler.stats.inc_value('regex not matched', 1)
+            unit = f'{currency.text}{kg_or_szt.text}'
             p = Product(
                 name=name.text,
                 price=price.text,
                 unit=unit,
+                volume=volume,
                 category=category_name,
                 url=f'{self.TESCO_URL}{uri}',
                 when=datetime.datetime.now(),
