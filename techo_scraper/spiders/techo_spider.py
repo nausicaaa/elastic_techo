@@ -1,12 +1,19 @@
 import datetime
+import logging
 
 import scrapy
+from colorlog import ColoredFormatter
 from scrapy.contrib.spiders import Rule
 from scrapy.linkextractors import LinkExtractor
 from lxml import html
 
 from techo_scraper.items import Product
 
+log = logging.getLogger('techo')
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+ch.setFormatter(ColoredFormatter())
+log.addHandler(ch)
 
 class TechoSpider(scrapy.Spider):
     TESCO_URL = 'https://ezakupy.tesco.pl'
@@ -63,7 +70,7 @@ class TechoSpider(scrapy.Spider):
         if next_page:
             next_href = next_page[0]
             next_page_url = f'{self.TESCO_URL}{next_href}'
-            self.logger.info(f'Scraped products from url with number:{next_href}')
+            log.info(f'Scraped products from url with number:{next_href}')
             request = scrapy.Request(
                 url=next_page_url,
                 callback=self.parse_categories,
