@@ -1,1 +1,2 @@
 Scrapy==1.5.0
+ScrapyElasticSearch==0.9.1

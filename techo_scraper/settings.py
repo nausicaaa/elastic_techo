@@ -14,9 +14,18 @@ BOT_NAME = 'elastic_techo'
 SPIDER_MODULES = ['techo_scraper.spiders']
 NEWSPIDER_MODULE = 'techo_scraper.spiders'
 
+ITEM_PIPELINES = {
+    'scrapyelasticsearch.scrapyelasticsearch.ElasticSearchPipeline': 500,
+    'techo_scraper.pipelines.ElasticPipeline': 1
+}
 
-# Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'elastic_techo (+http://www.yourdomain.com)'
+ELASTICSEARCH_SERVERS = ['http://127.0.0.1:9200/']
+ELASTICSEARCH_INDEX = 'techo'
+ELASTICSEARCH_INDEX_DATE_FORMAT = '%Y-%m'
+ELASTICSEARCH_TYPE = 'items'
+# ELASTICSEARCH_UNIQ_KEY = 'url'  # Custom unique key
+# http://imadalina.com/2014/11/crawling-websites-scrapy-elasticsearch-index/
+
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
