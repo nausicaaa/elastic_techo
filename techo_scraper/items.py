@@ -11,10 +11,8 @@ import scrapy
 class Product(scrapy.Item):
     name = scrapy.Field()
     price = scrapy.Field()
-    currency = scrapy.Field()
-    kg_or_szt = scrapy.Field()
     unit = scrapy.Field()
-    last_updated = scrapy.Field()
+    when = scrapy.Field()
     category = scrapy.Field()
-    category_url = scrapy.Field()
+    url = scrapy.Field()
 

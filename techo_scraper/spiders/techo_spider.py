@@ -15,10 +15,11 @@ ch.setLevel(logging.DEBUG)
 ch.setFormatter(ColoredFormatter())
 log.addHandler(ch)
 
+
 class TechoSpider(scrapy.Spider):
     TESCO_URL = 'https://ezakupy.tesco.pl'
-    name = "techo"
-    allowed_domains = ["ezakupy.tesco.pl"]
+    name = 'techo'
+    allowed_domains = ['ezakupy.tesco.pl']
     start_urls = (
         'https://ezakupy.tesco.pl/groceries/pl-PL/shop/',
     )
@@ -26,7 +27,7 @@ class TechoSpider(scrapy.Spider):
     Rules = (Rule(
         LinkExtractor(allow=(),
                       ),
-        callback="parse",
+        callback='parse',
         follow=True),)
 
     def parse(self, response):
@@ -35,32 +36,29 @@ class TechoSpider(scrapy.Spider):
             for selector in response.xpath('//div[@class="current"]//a')
         }
         for category_name, category_uri in categories.items():
-            category_uri = f'{self.TESCO_URL}{category_uri}/all'
             yield scrapy.Request(
-                category_uri,
+                f'{self.TESCO_URL}{category_uri}/all',
                 callback=self.parse_categories,
-                meta={'category_name': category_name, 'uri': category_uri}
+                meta={'category_name': category_name}
             )
 
     def parse_categories(self, response):
         dom = html.fromstring(response.body)
         category_name = response.meta.get('category_name')
-        uri = response.meta.get('uri')
+        uris = dom.xpath('//a[contains(@class, "product-tile--title product-tile--browsable")]/@href')
         names = dom.xpath('//a[contains(@class, "product-tile--title product-tile--browsable")]')
         prices = dom.xpath('//div[contains(@class, "price-per-quantity-weight")]//span[contains(@class, "value")]')
         currencies = dom.xpath('//span[contains(@class, "currency")]')
         kg_or_szts = dom.xpath('//span[contains(@class, "weight")]')
-        for name, price, currency, kg_or_szt in zip(names, prices, currencies, kg_or_szts):
+        for name, price, currency, kg_or_szt, uri in zip(names, prices, currencies, kg_or_szts, uris):
             unit = currency.text + kg_or_szt.text
             p = Product(
                 name=name.text,
                 price=price.text,
-                currency=currency.text,
-                kg_or_szt=kg_or_szt.text,
                 unit=unit,
                 category=category_name,
-                category_url=uri,
-                last_updated=datetime.datetime.now(),
+                url=f'{self.TESCO_URL}{uri}',
+                when=datetime.datetime.now(),
             )
             yield p
 
@@ -74,6 +72,6 @@ class TechoSpider(scrapy.Spider):
             request = scrapy.Request(
                 url=next_page_url,
                 callback=self.parse_categories,
-                meta={'category_name': category_name, 'uri': uri}
+                meta={'category_name': category_name}
             )
             yield request
