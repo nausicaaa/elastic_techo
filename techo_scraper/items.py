@@ -16,5 +16,5 @@ class Product(scrapy.Item):
     unit = scrapy.Field()
     last_updated = scrapy.Field()
     category = scrapy.Field()
-    url = scrapy.Field()
+    category_url = scrapy.Field()
 
