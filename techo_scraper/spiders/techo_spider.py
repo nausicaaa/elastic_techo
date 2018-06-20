@@ -62,7 +62,7 @@ class TechoSpider(scrapy.Spider):
             unit = f'{currency.text}{kg_or_szt.text}'
             p = Product(
                 name=name.text,
-                price=float(price.text.replace(",", ".")),
+                price=float(price.text.replace(",", ".").replace(" ","")),
                 unit=unit,
                 volume=volume,
                 category=category_name,
